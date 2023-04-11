@@ -10,7 +10,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../6.félév/Adatb2/drivers/ojdbc8.jar!/" />
+          <root url="jar://$MODULE_DIR$/../drivers/ojdbc8.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
