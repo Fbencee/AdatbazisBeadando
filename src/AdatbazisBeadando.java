@@ -55,10 +55,8 @@ public class AdatbazisBeadando {
                     int hazaiG = sc.nextInt();
                     System.out.println("Away Goals:");
                     int vendegG = sc.nextInt();
-                    System.out.println("Date(format:9/28/2021):");
-                    java.util.Date utilDate = new SimpleDateFormat("dd/MM/yyyy").parse(sc.next());
-                    java.sql.Date sqlDate = new Date(utilDate.getTime());
-                    System.out.println(sqlDate);
+                    System.out.println("Date(format:YYYY-MM-DD):");
+                    String sqlDate = sc.next();
                     System.out.println("Stadium ID:");
                     int stadionID = sc.nextInt();
                     DataInsertToMerkozes(merkozesID, hazaiG, vendegG, sqlDate, stadionID);
@@ -70,11 +68,41 @@ public class AdatbazisBeadando {
                     ShowActions();
                     break;
                 case 8:
+                    TableNames();
+                    System.out.println("Choose a table name:");
+                    String tableName = sc.next();
+                    switch (tableName.toLowerCase()) {
+                        case "stadion":
+                            WriteToTxt(ConvertRsToList(SelectAllFromStadion()), tableName);
+                            break;
+                        case "merkozes":
+                            WriteToTxt(ConvertRsToList(SelectAllFromMerkozes()), tableName);
+                            break;
+                        case "csapat":
+                            WriteToTxt(ConvertRsToList(SelectAllFromCsapat()), tableName);
+                            break;
+                        case "labdarugo":
+                            WriteToTxt(ConvertRsToList(SelectAllFromLabdarugo()), tableName);
+                            break;
+                        case "ligak":
+                            WriteToTxt(ConvertRsToList(SelectAllFromLigak()), tableName);
+                            break;
+                        case "csl":
+                            WriteToTxt(ConvertRsToList(SelectAllFromCsL()), tableName);
+                            break;
+                        case "statisztika":
+                            WriteToTxt(ConvertRsToList(SelectAllFromStatisztika()), tableName);
+                            break;
+                        case "jatszik":
+                            WriteToTxt(ConvertRsToList(SelectAllFromJatszik()), tableName);
+                            break;
+                        default:
+                            System.out.println("That's not a table name");
+                            break;
+                    }
+                case 9:
                     Disconnect();
                     ok = true;
-                    break;
-                case 9:
-                    WriteToTxt(ConvertRsToList(SelectAllFromStadion()));
                     break;
                 default:
                     System.out.println("That action not exists.");
@@ -95,7 +123,8 @@ public class AdatbazisBeadando {
         System.out.println("5 : Insert a new data row to the Merkozes table");
         System.out.println("6 : List all the tables in the database.");
         System.out.println("7 : Show the actions again.");
-        System.out.println("8 : Leave the application.");
+        System.out.println("8 : Write data to a text file.");
+        System.out.println("9 : Leave the application.");
     }
 
     public static void DriverReg() {
@@ -186,25 +215,25 @@ public class AdatbazisBeadando {
             stmt.executeUpdate(insertCmd);
             insertCmd = "INSERT INTO Ligak VALUES ( 303,'Football League One' )";
             stmt.executeUpdate(insertCmd);
-            insertCmd = "INSERT INTO Labdarugo VALUES ( 401,'Jamie Vardy', TO_DATE('1987-11-1','YYYY-MM-DD) , 'ST', 9, 'jobb', 102 )";
+            insertCmd = "INSERT INTO Labdarugo VALUES ( 401,'Jamie Vardy', TO_DATE('1987-11-1 16:00','YYYY-MM-DD HH24:MI') , 'ST', 9, 'jobb', 102 )";
             stmt.executeUpdate(insertCmd);
-            /*insertCmd = "INSERT INTO Labdarugo VALUES ( 402,'Youri Tielemans', TO_DATE('1997-7-5','YYYY-MM-DD), 'CM', 8, 'jobb', 101)";
+            insertCmd = "INSERT INTO Labdarugo VALUES ( 402,'Youri Tielemans', TO_DATE('1997-7-5 17:30','YYYY-MM-DD HH24:MI'), 'CM', 8, 'jobb', 101)";
+            stmt.executeUpdate(insertCmd);
+            insertCmd = "INSERT INTO Labdarugo VALUES ( 403,'Tyrone Mings', TO_DATE('1993-3-13 15:00','YYYY-MM-DD HH24:MI'), 'CB', 5, 'jobb', 102)";
+            stmt.executeUpdate(insertCmd);
+            insertCmd = "INSERT INTO Labdarugo VALUES ( 404,'John McGinn', TO_DATE('1994-10-18 21:00','YYYY-MM-DD HH24:MI'), 'CDM', 7, 'bal', 103)";
+            stmt.executeUpdate(insertCmd);
+            insertCmd = "INSERT INTO Merkozes ( MerkozesID, HazaiGolokSzama, VendegGolokSzama, Idopont,StadionID) VALUES(501, 4, 1, TO_DATE('2021-9-28','YYYY-MM-DD'), 2)";
+            stmt.executeUpdate(insertCmd);
+            insertCmd = "INSERT INTO Merkozes ( MerkozesID, HazaiGolokSzama, VendegGolokSzama, Idopont,StadionID) VALUES(502, 2, 2, TO_DATE('2021-10-11','YYYY-MM-DD'), 2)";
+            stmt.executeUpdate(insertCmd);
+            insertCmd = "INSERT INTO Merkozes ( MerkozesID, HazaiGolokSzama, VendegGolokSzama, Idopont,StadionID) VALUES(503, 6, 0, TO_DATE('2021-9-17','YYYY-MM-DD'), 3)";
             stmt.executeUpdate(insertCmd);
             insertCmd = "INSERT INTO CSL VALUES ( 101,301)";
             stmt.executeUpdate(insertCmd);
             insertCmd = "INSERT INTO CSL VALUES ( 102,301)";
             stmt.executeUpdate(insertCmd);
             insertCmd = "INSERT INTO CSL VALUES ( 103,302)";
-            stmt.executeUpdate(insertCmd);
-            insertCmd = "INSERT INTO Labdarugo VALUES ( 403,'Tyrone Mings', TO_DATE('1993-3-13','YYYY-MM-DD), 'CB', 5, 'jobb', 102)";
-            stmt.executeUpdate(insertCmd);
-            insertCmd = "INSERT INTO Labdarugo VALUES ( 404,'John McGinn', TO_DATE('1994-10-18','YYYY-MM-DD), 'CDM', 7, 'bal', 103)";
-            stmt.executeUpdate(insertCmd);
-            insertCmd = "INSERT INTO Merkozes ( MerkozesID, HazaiGolokSzama, VendegGolokSzama, Idopont,StadionID) VALUES(501, 4, 1, TO_DATE('2021-9-28','YYYY-MM-DD), 2)";
-            stmt.executeUpdate(insertCmd);
-            insertCmd = "INSERT INTO Merkozes ( MerkozesID, HazaiGolokSzama, VendegGolokSzama, Idopont,StadionID) VALUES(502, 2, 2, TO_DATE('2021-10-11','YYYY-MM-DD), 2)";
-            stmt.executeUpdate(insertCmd);
-            insertCmd = "INSERT INTO Merkozes ( MerkozesID, HazaiGolokSzama, VendegGolokSzama, Idopont,StadionID) VALUES(503, 6, 0, TO_DATE('2021-9-17','YYYY-MM-DD), 3)";
             stmt.executeUpdate(insertCmd);
             insertCmd = "INSERT INTO Statisztika VALUES ( 601, 540, 5, 0, 10, 3, 401)";
             stmt.executeUpdate(insertCmd);
@@ -217,21 +246,23 @@ public class AdatbazisBeadando {
             insertCmd = "INSERT INTO Jatszik VALUES ( 501, 101)";
             stmt.executeUpdate(insertCmd);
             insertCmd = "INSERT INTO Jatszik VALUES ( 502, 103)";
-            stmt.executeUpdate(insertCmd);*/
+            stmt.executeUpdate(insertCmd);
             System.out.println("Successful data insert.");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
     }
 
-    public static void DataInsertToMerkozes(int merkozesId, int hazaiG, int vendegG, Date idopont, int stadionId) throws SQLException {
-        PreparedStatement stmt = connection.prepareStatement("INSERT INTO Merkozes ( MerkozesID, HazaiGolokSzama, VendegGolokSzama, Idopont,StadionID) VALUES (?,?,?,?,?)");
+    public static void DataInsertToMerkozes(int merkozesId, int hazaiG, int vendegG, String idopont, int stadionId) throws SQLException {
+        PreparedStatement stmt = connection.prepareStatement("INSERT INTO Merkozes ( MerkozesID, HazaiGolokSzama, VendegGolokSzama, Idopont,StadionID) VALUES (?,?,?,TO_DATE(?,'YYYY-MM-DD'),?)");
 
         stmt.setInt(1, merkozesId);
         stmt.setInt(2, hazaiG);
         stmt.setInt(3, vendegG);
-        stmt.setDate(4, idopont);
+        stmt.setString(4, idopont);
         stmt.setInt(5, stadionId);
+        stmt.executeUpdate();
+        stmt.close();
         System.out.println("Successful insert.");
     }
 
@@ -274,9 +305,6 @@ public class AdatbazisBeadando {
         String queryCmd = "SELECT * FROM Merkozes";
         ResultSet rs = stmt.executeQuery(queryCmd);
 
-        WriteOut(rs);
-        rs.close();
-        stmt.close();
         System.out.println("Successful select.");
         return rs;
     }
@@ -287,9 +315,6 @@ public class AdatbazisBeadando {
         String queryCmd = "SELECT * FROM Csapat";
         ResultSet rs = stmt.executeQuery(queryCmd);
 
-        WriteOut(rs);
-        rs.close();
-        stmt.close();
         System.out.println("Successful select.");
         return rs;
     }
@@ -300,9 +325,6 @@ public class AdatbazisBeadando {
         String queryCmd = "SELECT * FROM Labdarugo";
         ResultSet rs = stmt.executeQuery(queryCmd);
 
-        WriteOut(rs);
-        rs.close();
-        stmt.close();
         System.out.println("Successful select.");
         return rs;
     }
@@ -313,9 +335,6 @@ public class AdatbazisBeadando {
         String queryCmd = "SELECT * FROM Statisztika";
         ResultSet rs = stmt.executeQuery(queryCmd);
 
-        WriteOut(rs);
-        rs.close();
-        stmt.close();
         System.out.println("Successful select.");
         return rs;
     }
@@ -326,9 +345,6 @@ public class AdatbazisBeadando {
         String queryCmd = "SELECT * FROM Ligak";
         ResultSet rs = stmt.executeQuery(queryCmd);
 
-        WriteOut(rs);
-        rs.close();
-        stmt.close();
         System.out.println("Successful select.");
         return rs;
     }
@@ -339,9 +355,6 @@ public class AdatbazisBeadando {
         String queryCmd = "SELECT * FROM CSL";
         ResultSet rs = stmt.executeQuery(queryCmd);
 
-        WriteOut(rs);
-        rs.close();
-        stmt.close();
         System.out.println("Successful select.");
         return rs;
     }
@@ -352,9 +365,6 @@ public class AdatbazisBeadando {
         String queryCmd = "SELECT * FROM Jatszik";
         ResultSet rs = stmt.executeQuery(queryCmd);
 
-        WriteOut(rs);
-        rs.close();
-        stmt.close();
         System.out.println("Successful select.");
         return rs;
     }
@@ -365,9 +375,12 @@ public class AdatbazisBeadando {
 
         while (rs.next()) {
             for (int i = 1; i <= columnsNumber; i++) {
-                if (i > 1) System.out.print(",  ");
+                System.out.print(rsmd.getColumnName(i) + ",  ");
+            }
+            System.out.println("");
+            for (int i = 1; i <= columnsNumber; i++) {
                 String columnValue = rs.getString(i);
-                System.out.print(columnValue + " " + rsmd.getColumnName(i));
+                System.out.print(columnValue + ",  ");
             }
             System.out.println("");
         }
@@ -386,6 +399,11 @@ public class AdatbazisBeadando {
         }
     }
 
+    public static void TableNames() {
+        System.out.println("Table names:");
+        System.out.println("Stadion\nMerkozes\nCsapat\nLigak\nCSL\nStatisztika\nJatszik\nLabdarugo");
+    }
+
     public static List<String> ConvertRsToList(ResultSet rs) throws SQLException {
         ResultSetMetaData rsmd = rs.getMetaData();
         int columnsNumber = rsmd.getColumnCount();
@@ -394,14 +412,14 @@ public class AdatbazisBeadando {
 
         while (rs.next()) {
             String record = "";
-            if(headerNeeded) {
-                for (int i = 1; i < columnsNumber; i++) {
+            if (headerNeeded) {
+                for (int i = 1; i <= columnsNumber; i++) {
                     record += rsmd.getColumnName(i) + ", ";
                 }
                 data.add(record);
                 record = "";
             }
-            for(int i = 1; i < columnsNumber; i++) {
+            for (int i = 1; i <= columnsNumber; i++) {
                 record += rs.getString(i) + ", ";
             }
             data.add(record);
@@ -411,11 +429,11 @@ public class AdatbazisBeadando {
         return data;
     }
 
-    public static void WriteToTxt(List<String> data){
+    public static void WriteToTxt(List<String> data, String filename) {
         try {
-            FileWriter txtWriter = new FileWriter("data.txt");
+            FileWriter txtWriter = new FileWriter(filename.toLowerCase() + ".txt");
 
-            for (String oneData: data) {
+            for (String oneData : data) {
                 txtWriter.write(oneData + "\n");
             }
 
