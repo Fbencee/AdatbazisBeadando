@@ -2,9 +2,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.Class;
 import java.sql.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -12,7 +9,7 @@ import java.util.Scanner;
 public class AdatbazisBeadando {
     private static Connection connection;
 
-    public static void main(String[] args) throws SQLException, ParseException {
+    public static void main(String[] args) throws SQLException {
         DriverReg();
 
         Scanner sc = new Scanner(System.in);
@@ -32,22 +29,12 @@ public class AdatbazisBeadando {
             System.out.println("Choose a number:");
             int number = Integer.parseInt(sc.next());
             switch (number) {
-                case 0:
-                    CreateTables();
-                    break;
-                case 1:
-                    DeleteTables();
-                    break;
-                case 2:
-                    InsertData();
-                    break;
-                case 3:
-                    WriteOut(SelectAllFromMerkozes());
-                    break;
-                case 4:
-                    WriteOut(SelectAllFromStadion());
-                    break;
-                case 5:
+                case 0 -> CreateTables();
+                case 1 -> DeleteTables();
+                case 2 -> InsertData();
+                case 3 -> WriteOut(SelectAllFromMerkozes());
+                case 4 -> WriteOut(SelectAllFromStadion());
+                case 5 -> {
                     System.out.println("Please give me the data which you would like to insert!");
                     System.out.println("ID:");
                     int merkozesID = sc.nextInt();
@@ -60,53 +47,38 @@ public class AdatbazisBeadando {
                     System.out.println("Stadium ID:");
                     int stadionID = sc.nextInt();
                     DataInsertToMerkozes(merkozesID, hazaiG, vendegG, sqlDate, stadionID);
-                    break;
-                case 6:
-                    GetTableNames();
-                    break;
-                case 7:
-                    ShowActions();
-                    break;
-                case 8:
+                }
+                case 6 -> GetTableNames();
+                case 7 -> ShowActions();
+                case 8 -> {
                     TableNames();
                     System.out.println("Choose a table name:");
                     String tableName = sc.next();
                     switch (tableName.toLowerCase()) {
-                        case "stadion":
-                            WriteToTxt(ConvertRsToList(SelectAllFromStadion()), tableName);
-                            break;
-                        case "merkozes":
-                            WriteToTxt(ConvertRsToList(SelectAllFromMerkozes()), tableName);
-                            break;
-                        case "csapat":
-                            WriteToTxt(ConvertRsToList(SelectAllFromCsapat()), tableName);
-                            break;
-                        case "labdarugo":
-                            WriteToTxt(ConvertRsToList(SelectAllFromLabdarugo()), tableName);
-                            break;
-                        case "ligak":
-                            WriteToTxt(ConvertRsToList(SelectAllFromLigak()), tableName);
-                            break;
-                        case "csl":
-                            WriteToTxt(ConvertRsToList(SelectAllFromCsL()), tableName);
-                            break;
-                        case "statisztika":
-                            WriteToTxt(ConvertRsToList(SelectAllFromStatisztika()), tableName);
-                            break;
-                        case "jatszik":
-                            WriteToTxt(ConvertRsToList(SelectAllFromJatszik()), tableName);
-                            break;
-                        default:
-                            System.out.println("That's not a table name");
-                            break;
+                        case "stadion" -> WriteToTxt(ConvertRsToList(SelectAllFromStadion()), tableName);
+                        case "merkozes" -> WriteToTxt(ConvertRsToList(SelectAllFromMerkozes()), tableName);
+                        case "csapat" -> WriteToTxt(ConvertRsToList(SelectAllFromCsapat()), tableName);
+                        case "labdarugo" -> WriteToTxt(ConvertRsToList(SelectAllFromLabdarugo()), tableName);
+                        case "ligak" -> WriteToTxt(ConvertRsToList(SelectAllFromLigak()), tableName);
+                        case "csl" -> WriteToTxt(ConvertRsToList(SelectAllFromCsL()), tableName);
+                        case "statisztika" -> WriteToTxt(ConvertRsToList(SelectAllFromStatisztika()), tableName);
+                        case "jatszik" -> WriteToTxt(ConvertRsToList(SelectAllFromJatszik()), tableName);
+                        default -> System.out.println("That's not a table name");
                     }
-                case 9:
+                }
+                case 9 -> {
+                    System.out.println("Please choose a city:");
+                    String city = sc.next();
+                    System.out.println("Please choose a goal difference:");
+                    String diff = sc.next();
+                    WriteOut(SelectFromMerkozesAndStadion(city, diff));
+                }
+                case 10 -> {
                     Disconnect();
                     ok = true;
-                    break;
-                default:
-                    System.out.println("That action not exists.");
-                    break;
+                    System.out.println("Goodbye!");
+                }
+                default -> System.out.println("That action not exists.");
             }
 
         } while (!ok);
@@ -124,7 +96,8 @@ public class AdatbazisBeadando {
         System.out.println("6 : List all the tables in the database.");
         System.out.println("7 : Show the actions again.");
         System.out.println("8 : Write data to a text file.");
-        System.out.println("9 : Leave the application.");
+        System.out.println("9 : Select from stadion and merkozes by goal difference and city.");
+        System.out.println("10 : Leave the application.");
     }
 
     public static void DriverReg() {
@@ -289,6 +262,18 @@ public class AdatbazisBeadando {
         System.out.println("Successful deletion.");
     }
 
+    public static ResultSet SelectFromMerkozesAndStadion(String city, String diff) throws SQLException {
+        PreparedStatement pstmt = connection.prepareStatement("SELECT Hazaigolokszama, Vendeggolokszama, Idopont, Nev, Ferohely FROM Merkozes,Stadion WHERE  Stadion.varos = ? AND Golkulonbseg >= ?");
+
+        pstmt.setString(1,city);
+        pstmt.setString(2,diff);
+        ResultSet rs = pstmt.executeQuery();
+
+        System.out.println("Successful select.");
+
+        return rs;
+    }
+
     public static ResultSet SelectAllFromStadion() throws SQLException {
         Statement stmt = connection.createStatement();
 
@@ -373,17 +358,19 @@ public class AdatbazisBeadando {
         ResultSetMetaData rsmd = rs.getMetaData();
         int columnsNumber = rsmd.getColumnCount();
 
+        for (int i = 1; i <= columnsNumber; i++) {
+            System.out.print(rsmd.getColumnName(i) + ",  ");
+        }
+        System.out.println();
+
         while (rs.next()) {
-            for (int i = 1; i <= columnsNumber; i++) {
-                System.out.print(rsmd.getColumnName(i) + ",  ");
-            }
-            System.out.println("");
             for (int i = 1; i <= columnsNumber; i++) {
                 String columnValue = rs.getString(i);
                 System.out.print(columnValue + ",  ");
             }
-            System.out.println("");
+            System.out.println();
         }
+        rs.close();
     }
 
     public static void GetTableNames() throws SQLException {
@@ -411,18 +398,18 @@ public class AdatbazisBeadando {
         boolean headerNeeded = true;
 
         while (rs.next()) {
-            String record = "";
+            StringBuilder record = new StringBuilder();
             if (headerNeeded) {
                 for (int i = 1; i <= columnsNumber; i++) {
-                    record += rsmd.getColumnName(i) + ", ";
+                    record.append(rsmd.getColumnName(i)).append(", ");
                 }
-                data.add(record);
-                record = "";
+                data.add(record.toString());
+                record = new StringBuilder();
             }
             for (int i = 1; i <= columnsNumber; i++) {
-                record += rs.getString(i) + ", ";
+                record.append(rs.getString(i)).append(", ");
             }
-            data.add(record);
+            data.add(record.toString());
             headerNeeded = false;
         }
 
