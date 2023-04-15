@@ -71,9 +71,30 @@ public class AdatbazisBeadando {
                     String city = sc.next();
                     System.out.println("Please choose a goal difference:");
                     String diff = sc.next();
-                    WriteOut(SelectFromMerkozesAndStadion(city, diff));
+                    SelectFromMerkozesAndStadion(city, diff);
                 }
                 case 10 -> {
+                    System.out.println("Please choose a number of assists:");
+                    int assists = sc.nextInt();
+                    SelectAboveNumberOfAssists(assists);
+                }
+                case 11 -> {
+                    SelectMaxGoal();
+                }
+                case 12 -> {
+                    System.out.println("Please give me the Merkozes ID:");
+                    int id = sc.nextInt();
+                    System.out.println("Homes goals:");
+                    int home = sc.nextInt();
+                    System.out.println("Away goals:");
+                    int away = sc.nextInt();
+                    System.out.println("Are you sure you want to change the table?(y/n)");
+                    if (sc.next().equalsIgnoreCase("y")) {
+                        connection.setAutoCommit(false);
+                        UpdateMerkozes(home, away, id);
+                    }
+                }
+                case 13 -> {
                     Disconnect();
                     ok = true;
                     System.out.println("Goodbye!");
@@ -97,7 +118,10 @@ public class AdatbazisBeadando {
         System.out.println("7 : Show the actions again.");
         System.out.println("8 : Write data to a text file.");
         System.out.println("9 : Select from stadion and merkozes by goal difference and city.");
-        System.out.println("10 : Leave the application.");
+        System.out.println("10 : Select from statisztika and labdarugo by the number of assists. ");
+        System.out.println("11 : Select the the player with the most goal.");
+        System.out.println("12 : Update Merkozes goals.");
+        System.out.println("13 : Leave the application.");
     }
 
     public static void DriverReg() {
@@ -198,7 +222,7 @@ public class AdatbazisBeadando {
             stmt.executeUpdate(insertCmd);
             insertCmd = "INSERT INTO Merkozes ( MerkozesID, HazaiGolokSzama, VendegGolokSzama, Idopont,StadionID) VALUES(501, 4, 1, TO_DATE('2021-9-28','YYYY-MM-DD'), 2)";
             stmt.executeUpdate(insertCmd);
-            insertCmd = "INSERT INTO Merkozes ( MerkozesID, HazaiGolokSzama, VendegGolokSzama, Idopont,StadionID) VALUES(502, 2, 2, TO_DATE('2021-10-11','YYYY-MM-DD'), 2)";
+            insertCmd = "INSERT INTO Merkozes ( MerkozesID, HazaiGolokSzama, VendegGolokSzama, Idopont,StadionID) VALUES(502, 2, 2, TO_DATE('2021-10-11','YYYY-MM-DD'), 1)";
             stmt.executeUpdate(insertCmd);
             insertCmd = "INSERT INTO Merkozes ( MerkozesID, HazaiGolokSzama, VendegGolokSzama, Idopont,StadionID) VALUES(503, 6, 0, TO_DATE('2021-9-17','YYYY-MM-DD'), 3)";
             stmt.executeUpdate(insertCmd);
@@ -213,6 +237,8 @@ public class AdatbazisBeadando {
             insertCmd = "INSERT INTO Statisztika VALUES ( 602, 367, 2, 0, 1, 7, 402)";
             stmt.executeUpdate(insertCmd);
             insertCmd = "INSERT INTO Statisztika VALUES ( 603, 256, 7, 1, 1, 0, 403)";
+            stmt.executeUpdate(insertCmd);
+            insertCmd = "INSERT INTO Statisztika VALUES ( 604, 1000, 10, 0, 4, 3, 404)";
             stmt.executeUpdate(insertCmd);
             insertCmd = "INSERT INTO Jatszik VALUES ( 501, 102)";
             stmt.executeUpdate(insertCmd);
@@ -262,16 +288,50 @@ public class AdatbazisBeadando {
         System.out.println("Successful deletion.");
     }
 
-    public static ResultSet SelectFromMerkozesAndStadion(String city, String diff) throws SQLException {
-        PreparedStatement pstmt = connection.prepareStatement("SELECT Hazaigolokszama, Vendeggolokszama, Idopont, Nev, Ferohely FROM Merkozes,Stadion WHERE  Stadion.varos = ? AND Golkulonbseg >= ?");
+    public static void SelectFromMerkozesAndStadion(String city, String diff) throws SQLException {
+        PreparedStatement pstmt = connection.prepareStatement("SELECT Hazaigolokszama, Vendeggolokszama, Idopont, Nev, Ferohely FROM Merkozes INNER JOIN Stadion ON Merkozes.StadionID = Stadion.StadionID WHERE  Stadion.varos = ? AND Golkulonbseg >= ?");
 
-        pstmt.setString(1,city);
-        pstmt.setString(2,diff);
+        pstmt.setString(1, city);
+        pstmt.setString(2, diff);
         ResultSet rs = pstmt.executeQuery();
 
-        System.out.println("Successful select.");
+        WriteOut(rs);
+        rs.close();
+        pstmt.close();
+    }
 
-        return rs;
+    public static void SelectAboveNumberOfAssists(int golpassz) throws SQLException {
+        PreparedStatement pstmt = connection.prepareStatement("SELECT Lnev, Jatekperc, Golpassz  FROM Statisztika INNER JOIN  Labdarugo ON Statisztika.LabdarugoID = Labdarugo.LabdarugoID WHERE Statisztika.Golpassz > ?");
+
+        pstmt.setInt(1, golpassz);
+        ResultSet rs = pstmt.executeQuery();
+
+        WriteOut(rs);
+        rs.close();
+        pstmt.close();
+    }
+
+    public static void SelectMaxGoal() throws SQLException {
+        Statement pstmt = connection.createStatement();
+        String queryCmd = "SELECT * FROM (SELECT Lnev, Gol  FROM Statisztika INNER JOIN  Labdarugo ON Statisztika.LabdarugoID = Labdarugo.LabdarugoID ORDER BY Statisztika.Gol DESC) WHERE ROWNUM <= 1";
+        ResultSet rs = pstmt.executeQuery(queryCmd);
+
+        WriteOut(rs);
+        rs.close();
+        pstmt.close();
+    }
+
+    public static void UpdateMerkozes(int hazaiGol, int vendegGol, int ID) throws SQLException {
+        PreparedStatement pstmt = connection.prepareStatement("UPDATE Merkozes SET Hazaigolokszama = ?, Vendeggolokszama = ? WHERE MerkozesID = ?");
+        pstmt.setInt(1, hazaiGol);
+        pstmt.setInt(2, vendegGol);
+        pstmt.setInt(3, ID);
+
+        int affected = pstmt.executeUpdate();
+
+        connection.commit();
+        connection.setAutoCommit(true);
+        System.out.println(affected + "rows were affected.");
     }
 
     public static ResultSet SelectAllFromStadion() throws SQLException {
